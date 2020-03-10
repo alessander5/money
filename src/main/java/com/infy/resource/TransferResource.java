@@ -12,7 +12,6 @@ import javax.ws.rs.core.MediaType;
 
 import java.util.Optional;
 
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
@@ -32,9 +31,7 @@ public class TransferResource {
 
     @GET
     public void getAll(@Suspended AsyncResponse asyncResponse) {
-        supplyAsync(billingFacade::getTransfers)
-            .thenApply(transfers -> asyncResponse.resume(ok(transfers).build()))
-            .exceptionally(asyncResponse::resume);
+        asyncResponse.resume(ok(billingFacade.getTransfers()).build());
     }
 
     @GET
@@ -42,7 +39,7 @@ public class TransferResource {
     public void getById(@Suspended AsyncResponse asyncResponse, @PathParam("id") long id) {
         Optional<Transfer> transfer = billingFacade.getTransfer(id);
         if(!transfer.isPresent()) {
-            throw new WebApplicationException("Transfer with id:'" + id + "' not found ", NOT_FOUND);
+            asyncResponse.resume(new WebApplicationException("Transfer with id:'" + id + "' not found ", NOT_FOUND));
         } else {
             asyncResponse.resume(ok(transfer.get()).build());
         }
@@ -55,9 +52,7 @@ public class TransferResource {
             || transferDto.getAmount() == null) {
             asyncResponse.resume(new WebApplicationException("Fields should not be empty", BAD_REQUEST));
         } else {
-            supplyAsync(() -> billingFacade.createTransfer(transferDto))
-                .thenApply(transfer -> asyncResponse.resume(status(CREATED).entity(transfer).build()))
-                .exceptionally(asyncResponse::resume);
+            asyncResponse.resume(status(CREATED).entity(billingFacade.createTransfer(transferDto)).build());
         }
     }
 

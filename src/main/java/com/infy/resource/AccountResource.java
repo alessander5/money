@@ -12,7 +12,6 @@ import javax.ws.rs.core.Response;
 
 import java.util.Optional;
 
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static javax.ws.rs.core.Response.Status.*;
 import static javax.ws.rs.core.Response.ok;
 import static javax.ws.rs.core.Response.status;
@@ -33,7 +32,7 @@ public class AccountResource {
     public void getById(@Suspended AsyncResponse asyncResponse, @PathParam("id") long id) {
         Optional<Account> account = billingFacade.getAccount(id);
         if(!account.isPresent()) {
-            throw new WebApplicationException("Account with id:'" + id + "' not found ", NOT_FOUND);
+            asyncResponse.resume(new WebApplicationException("Account with id:'" + id + "' not found ", NOT_FOUND));
         } else {
             asyncResponse.resume(ok(account.get()).build());
         }
@@ -41,9 +40,7 @@ public class AccountResource {
 
     @GET
     public void getAll(@Suspended AsyncResponse asyncResponse) {
-        supplyAsync(billingFacade::getAllAccounts)
-            .thenApply(accounts -> asyncResponse.resume(ok(accounts).build()))
-            .exceptionally(asyncResponse::resume);
+        asyncResponse.resume(ok(billingFacade.getAllAccounts()).build());
     }
 
     @POST
@@ -51,9 +48,7 @@ public class AccountResource {
         if (account.getId() != null) {
             asyncResponse.resume(new WebApplicationException("Id should be empty", BAD_REQUEST));
         } else {
-            supplyAsync(() -> billingFacade.createAccount(account))
-                .thenApply(newAccount -> asyncResponse.resume(status(CREATED).entity(newAccount).build()))
-                .exceptionally(asyncResponse::resume);
+            asyncResponse.resume(status(CREATED).entity(billingFacade.createAccount(account)).build());
         }
     }
 
@@ -63,9 +58,7 @@ public class AccountResource {
         if(id <= 0) {
             asyncResponse.resume(new WebApplicationException("Id should not be less than zero", BAD_REQUEST));
         } else {
-            supplyAsync(() -> billingFacade.updateAccount(account.setId(id)))
-                .thenApply(updatedAccount -> asyncResponse.resume(ok(updatedAccount).build()))
-                .exceptionally(asyncResponse::resume);
+            asyncResponse.resume(ok(billingFacade.updateAccount(account.setId(id))).build());
         }
     }
 
@@ -74,14 +67,12 @@ public class AccountResource {
     public void delete(@Suspended AsyncResponse asyncResponse, @PathParam("id") long id) {
         Optional<Account> account = billingFacade.getAccount(id);
         if(!account.isPresent()) {
-            throw new WebApplicationException("Account with id:'" + id + "' not found ", BAD_REQUEST);
+            asyncResponse.resume(new WebApplicationException("Account with id:'" + id + "' not found ", BAD_REQUEST));
         } else {
-            supplyAsync(() -> billingFacade.removeAccount(id))
-                .thenApply(isDeleted -> isDeleted
-                        ? Response.status(NO_CONTENT).build()
-                        : Response.status(NOT_FOUND).build())
-                .thenApply(asyncResponse::resume)
-                .exceptionally(asyncResponse::resume);
+            Response.ResponseBuilder builder = billingFacade.removeAccount(id)
+                ? Response.status(NO_CONTENT)
+                : Response.status(NOT_FOUND);
+            asyncResponse.resume(builder.build());
         }
     }
 }

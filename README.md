@@ -30,14 +30,6 @@ mvn jetty:run
 | GET | /transfers/{id} | get transfer by id |
 | POST | /transfers | perform transfer between 2 accounts |
 
-### Http Status
-- 200 OK
-- 201 Created
-- 204 No Content
-- 400 Bad Request
-- 404 Not Found
-- 500 Internal Server Error
-
 
 ----
 
@@ -62,6 +54,8 @@ GET
 http://localhost:8080/accounts
 
 ```
+----
+
 ##### Create transfer:
 
 ```sh
