@@ -3,14 +3,15 @@
 A simple Java RESTful API for money transfers between users accounts
 
 ### Technologies
-- JAX-RS API
+- JAX-RS API based on Jersey
 - Guice
 - Hibernate
 - H2 in memory database
 - Slf4j
-- Jetty & Jersey
+- Jetty
 - Rest Assured
-
+- Junit and Mockito
+- Jetty 
 
 ### How to run
 ```sh
@@ -54,9 +55,8 @@ GET
 http://localhost:8080/accounts
 
 ```
-----
 
-##### Create transfer:
+#### Create transfer:
 
 ```sh
 
