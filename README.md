@@ -11,7 +11,6 @@ A simple Java RESTful API for money transfers between users accounts
 - Jetty
 - Rest Assured
 - Junit and Mockito
-- Jetty 
 
 ### How to run
 ```sh
@@ -56,7 +55,7 @@ http://localhost:8080/accounts
 
 ```
 
-#### Create transfer:
+### Create transfer:
 
 ```sh
 
